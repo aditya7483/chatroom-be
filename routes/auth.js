@@ -11,39 +11,6 @@ const token = process.env.JSON_SECRET
 
 router.use(cors())
 
-//endpoint to register a new user. username,password and email are given in the body of the request
-router.post('/signup', [
-  body('username', 'Name is too short').isLength({ min: 4 }),
-  body('email', 'Please enter a valid email').isEmail(),
-  body('password', 'Password is too short').isLength({ min: 5 })
-], async (req, res) => {
-  const err = validationResult(req)
-  try {
-    if (!err.isEmpty()) {
-      res.status(404).json({ err: 'Please use valid credentials to create account' });
-    }
-    else {
-      const salt = await bcrypt.genSalt(10);
-      const pass = await bcrypt.hash(req.body.password, salt);
-      User.create({
-        username: req.body.username,
-        email: req.body.email,
-        password: pass,
-        isAdmin: req.body.isAdmin
-      }).then(response => {
-        res.json(response)
-      }
-      ).catch(err => {
-        res.status(404).json({ err: 'user with this username or email already exists' });
-      })
-    }
-  }
-  catch (err) {
-    res.status(501).send({ err: 'Internal Server Error' })
-  }
-
-})
-
 //endpoint to register a new user. username and password are given in the body of the request
 router.post('/login', [
   body('username', 'Please enter a valid email').exists(),

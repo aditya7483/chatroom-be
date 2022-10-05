@@ -1,7 +1,11 @@
 const mongoose = require('mongoose')
 
 const messSchema = new mongoose.Schema({
-  username: {
+  from: {
+    type: String,
+    required: true
+  },
+  to: {
     type: String,
     required: true
   },
