@@ -5,6 +5,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const Mess = require('./database/schemas/message');
 const io = new Server(server, {
   cors: {
     origin: `http://localhost:3000`,
@@ -23,9 +24,22 @@ app.use('/api/chat', require('./routes/chat'))
 
 io.on('connection', (socket) => {
   console.log('a user connected');
-
-  socket.on('hey', function (mess) {
-    console.log(mess);
+  socket.on('messageSent', async (data) => {
+    console.log('recieved message = ')
+    console.log(data)
+    try {
+      let response = await Mess.create(
+        {
+          to: data.to,
+          from: data.from,
+          message: data.message
+        }
+      )
+      console.log('message stored')
+    } catch (err) {
+      console.log('message error')
+      io.emit('messageError', err)
+    }
   })
 });
 

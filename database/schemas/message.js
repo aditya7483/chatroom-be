@@ -20,4 +20,5 @@ const messSchema = new mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model('messages', messSchema);
+const Mess = mongoose.model('messages', messSchema)
+module.exports = Mess;

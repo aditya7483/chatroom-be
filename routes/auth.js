@@ -73,8 +73,8 @@ router.post('/login', async (req, res) => {
     }
   }
   catch (err) {
-    // res.status(404).json({ err: "internal server error" });
-    res.status(404).json({ err: err });
+    res.status(404).json({ err: "internal server error" });
+    // res.status(404).json({ err: err });
   }
 })
 
