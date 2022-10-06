@@ -6,15 +6,19 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+  username: {
+    type: String,
+    unique: true,
+    required: true,
+  },
 
   password: {
     type: String,
     required: true,
-  }
-
+  },
 })
 
 const User = mongoose.model('user', userSchema)
-// User.createIndexes()
+User.createIndexes()
 
 module.exports = User;

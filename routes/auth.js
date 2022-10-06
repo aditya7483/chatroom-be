@@ -11,51 +11,89 @@ const token = process.env.JSON_SECRET
 
 router.use(cors())
 
-//endpoint to register a new user. username and password are given in the body of the request
-router.post('/login', [
-  body('username', 'Please enter a valid email').exists(),
-  body('password', 'Password is too short').exists()
+//endpoint to register a new user. username,password and email are given in the body of the request
+router.post('/signup', [
+  body('username', 'Name is too short').isLength({ min: 4 }),
+  body('email', 'Please enter a valid email').isEmail(),
+  body('password', 'Password is too short').isLength({ min: 5 })
 ], async (req, res) => {
   const err = validationResult(req)
-  if (!err.isEmpty()) {
-    res.status(404).json(err);
+  try {
+    if (!err.isEmpty()) {
+      res.status(404).json({ err: 'Please use valid credentials to create account' });
+    }
+    else {
+      const salt = await bcrypt.genSalt(10);
+      const pass = await bcrypt.hash(req.body.password, salt);
+      User.create({
+        username: req.body.username,
+        email: req.body.email,
+        password: pass,
+        isAdmin: req.body.isAdmin
+      }).then(response => {
+        res.json(response)
+      }
+      ).catch(err => {
+        res.status(404).json({ err: 'user with this username or email already exists' });
+        // res.status(404).json({ err: err });
+      })
+    }
   }
-  else {
-    const { username, password } = req.body
-    try {
-      let user = await User.findOne({ username: username })
-      if (!user) {
-        res.status(404).json({ err: "Invalid username or password" })
-      }
-
-      //user exists
-      else {
-        let passComp = await bcrypt.compare(password, user.password);
-        if (!passComp) {
-          res.status(404).json({ err: "Invalid username or password" })
-        }
-        //password is valid
-        else {
-          const data = {
-            user: {
-              id: user.id
-            }
-          }
-          const authToken = jwt.sign(data, token)
-          res.json({ authToken });
-        }
-      }
-    }
-    catch (err) {
-      res.status(404).json({ err: "internal server error" });
-    }
+  catch (err) {
+    res.status(501).send({ err: 'Internal Server Error' })
   }
 })
 
 
+//endpoint to register a new user. username and password are given in the body of the request
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body
+  try {
+    let user = await User.findOne({ username: username })
+    if (!user) {
+      res.status(404).json({ err: "Invalid username or password" })
+    }
+
+    //user exists
+    else {
+      let passComp = await bcrypt.compare(password, user.password);
+      if (!passComp) {
+        res.status(404).json({ err: "Invalid username or password" })
+      }
+      //password is valid
+      else {
+        const data = {
+          user: {
+            id: user.id
+          }
+        }
+        const authToken = jwt.sign(data, token)
+        res.json({ authToken });
+      }
+    }
+  }
+  catch (err) {
+    // res.status(404).json({ err: "internal server error" });
+    res.status(404).json({ err: err });
+  }
+})
+
+
+router.get('/getGlobalUsers', async (req, res) => {
+  try {
+    const result = await User.find().select('username')
+    if (result.length === 0) {
+      res.status(404).send('user not found')
+    }
+    else res.json(result)
+  } catch (err) {
+    res.status(401).send('Internal Server Error')
+  }
+})
+
 //authorization required (auth-token needed as a parameter)
 //auth-token of the user whose data is to be fetched is given as the header
-router.post('/getuser', authorize, async (req, res) => {
+router.get('/getUser', authorize, async (req, res) => {
   try {
     let userId = req.user.id
     const result = await User.findById(userId).select('-password')

@@ -11,18 +11,17 @@ const io = new Server(server, {
 });
 const router = express.Router();
 const Mess = require('../database/schemas/message.js');
-var cors = require('cors')
+var cors = require('cors');
+const fetchUser = require('../middleware/authorize.js');
 
 router.use(cors())
 let messages = [];
 
-io.on('hey', function (mess) {
-  console.log(mess);
-})
-
-router.get('/getTexts', async (req, res) => {
+router.post('/getTexts', fetchUser, async (req, res) => {
   try {
-    messages = await (Mess.find()).limit(100).sort({ KEY: -1 });
+    let from = req.body.from
+    let to = req.body.to
+    messages = await (Mess.find({ from: from, to: to })).limit(100).sort({ KEY: -1 });
 
     res.json({ data: messages })
   } catch (err) {
