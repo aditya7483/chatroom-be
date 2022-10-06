@@ -12,7 +12,12 @@ router.post('/getTexts', fetchUser, async (req, res) => {
   try {
     let from = req.body.from
     let to = req.body.to
-    messages = await (Mess.find({ from: from, to: to })).sort({ KEY: -1 });
+    messages = await (Mess.find(
+      {
+        "from": { "$in": [from, to] },
+        "to": { "$in": [from, to] }
+      }
+    )).sort({ KEY: -1 });
 
     res.json({ data: messages })
   } catch (err) {
