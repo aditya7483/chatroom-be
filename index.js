@@ -8,7 +8,8 @@ const { Server } = require("socket.io");
 const Mess = require('./database/schemas/message');
 const io = new Server(server, {
   cors: {
-    origin: `http://localhost:3000`,
+    // origin: `http://localhost:3000`,
+    origin: `https://chat-74.web.app`,
     methods: ['GET', 'POST']
   }
 });
@@ -23,7 +24,7 @@ app.use('/api/auth', require('./routes/auth'))
 app.use('/api/chat', require('./routes/chat'))
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  // console.log('a user connected');
   socket.on('messageSent', (data) => {
     Mess.create(
       {
@@ -35,7 +36,7 @@ io.on('connection', (socket) => {
       io.emit('messageRecieve', res)
     })
       .catch(err => {
-        console.log('message error')
+        // console.log('message error')
         io.emit('messageError', err)
       })
 
