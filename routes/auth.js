@@ -79,9 +79,10 @@ router.post('/login', async (req, res) => {
 })
 
 
-router.get('/getGlobalUsers', async (req, res) => {
+router.get('/getGlobalUsers', authorize, async (req, res) => {
   try {
-    const result = await User.find().select('username')
+    let userId = req.user.id
+    const result = await User.find({ "_id": { "$ne": userId } }).select('username')
     if (result.length === 0) {
       res.status(404).send('user not found')
     }
