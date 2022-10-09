@@ -82,11 +82,8 @@ router.post('/login', async (req, res) => {
 router.get('/getGlobalUsers', authorize, async (req, res) => {
   try {
     let userId = req.user.id
-    const result = await User.find({ "_id": { "$ne": userId } }).select('username')
-    if (result.length === 0) {
-      res.status(404).send('user not found')
-    }
-    else res.json(result)
+    const result = await User.find({ "_id": { "$ne": userId } }).select('username messAlert')
+    res.json(result)
   } catch (err) {
     res.status(401).send('Internal Server Error')
   }
@@ -103,7 +100,7 @@ router.get('/getUser', authorize, async (req, res) => {
     }
     else res.json(result)
   } catch (err) {
-    res.status(401).send('Internal Server Error')
+    res.status(501).send('Internal Server Error')
   }
 })
 
