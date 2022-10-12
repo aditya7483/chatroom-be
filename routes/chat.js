@@ -17,7 +17,7 @@ router.post('/getTexts', fetchUser, async (req, res) => {
         "from": { "$in": [from, to] },
         "to": { "$in": [from, to] }
       }
-    )).sort({ KEY: -1 }).limit(40);
+    )).sort({ KEY: -1 });
 
     res.json({ data: messages })
   } catch (err) {
